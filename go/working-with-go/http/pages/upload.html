@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <title>Upload file.</title>
+  </head>
+  <body>
+    <form action="http://192.168.8.46:9090/upload"
+      enctype="multipart/form-data">
+      <h3>
+        Please Choose a file to upload ;)
+      </h3>
+      <hr />
+      <ul>
+        <li><input type="file" name="uploadfile" value="ok"/> </li>
+        <li><input type="hidden" name="token" value="{{.}}"/></li>
+        <li><input type="submit" value="upload" /></li>
+      </ul>
+    </form>
+  </body>
+
+</html>
+

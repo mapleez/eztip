@@ -1,0 +1,13 @@
+# ------------------------------- #
+# This file is ASCII format, only 
+# support the interface for users
+# to configure the program
+# ------------------------------- #
+
+# The top choice http proxy server.
+proxy_server = "http://192.168.1.1:8080"
+
+# If top choice http proxy server cannot be
+# supported, the proxy server file can be
+# separated to find a valid one.
+proxy_file = "./proxy"

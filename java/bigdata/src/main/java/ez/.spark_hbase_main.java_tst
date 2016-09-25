@@ -1,0 +1,122 @@
+package ez;
+
+/*
+ * author : ez
+ * date : 2016/9/24
+ * description : SparkSQL for hbase query.
+ */
+
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.util.Base64;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
+import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
+import org.apache.spark.api.java.JavaPairRDD;
+
+import org.apache.hadoop.hbase.protobuf.ProtobufUtil;
+import org.apache.hadoop.hbase.protobuf.generated.ClientProtos;
+import org.apache.spark.api.java.function.PairFunction;
+// import scala.Tuple10;
+import scala.Tuple2;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+public class spark_hbase_main {
+
+	private class hive_test implements Serializable {
+		private String id, val;
+
+		public String getVal () {
+			return this.val;
+		}
+
+		public String getId () {
+			return this.id;
+		}
+		
+		public void setVal (String val) {
+			this.val = val;
+		}
+
+		public void setId (String id) {
+			this.id= id;
+		}
+	}
+		
+  private static String appName = "Hello";
+
+	private static void test2 () {
+    SparkSession spark = SparkSession
+      .builder ()
+      .appName("Java Spark SQL Example")
+      .getOrCreate();
+      // .config ("spark.some.config.option", "some-value")
+		SparkContext context = spark.SparkContext ();
+	}
+
+	private static void test1 () {
+		SparkConf sparkConf = new SparkConf ().setAppName (appName);
+    JavaSparkContext jsc = new JavaSparkContext (sparkConf);
+
+    Configuration conf = HBaseConfiguration.create ();
+
+    Scan scan = new Scan ();
+    scan.addFamily (Bytes.toBytes ("cf"));
+    scan.addColumn (Bytes.toBytes ("cf"), Bytes.toBytes ("c1"));
+
+    String scanToString = "";
+    try {
+      ClientProtos.Scan proto = ProtobufUtil.toScan (scan);
+      scanToString = Base64.encodeBytes (proto.toByteArray ());
+			System.out.println ("xxxxxxxxxxxxxxxxxxxxxxxx scan : " + scanToString);
+    } catch (IOException io) {
+      System.out.println(io);
+    }
+
+    for (int i = 0; i < 2; i++) {
+      try {
+        String tableName = "hive_test";
+        conf.set (TableInputFormat.INPUT_TABLE, tableName);
+        conf.set (TableInputFormat.SCAN, scanToString);
+
+        JavaPairRDD <ImmutableBytesWritable, Result> hBaseRDD = jsc.newAPIHadoopRDD (conf,
+                TableInputFormat.class, ImmutableBytesWritable.class,
+                Result.class);
+
+        JavaPairRDD <String, List <Float>> art_scores = hBaseRDD.mapToPair (
+          new PairFunction <Tuple2 <ImmutableBytesWritable, Result>, String, List <Float>> () {
+            @Override
+            public Tuple2 <String, List <Float>> call (Tuple2 <ImmutableBytesWritable, Result> results) {
+              List <Float> list = new ArrayList <Float> ();
+
+              byte [] art_score = results._2 ().getValue (Bytes.toBytes ("cf"), Bytes.toBytes ("c1"));
+
+              list.add (Float.parseFloat (Bytes.toString (art_score)));
+
+              return new Tuple2 <String, List <Float>> (Bytes.toString (results._1 ().get ()), list);
+            }
+          }
+        );
+        System.out.println ("xxxxxxxxxxxxxxxxxxxxxxxxxxx" + art_scores.collect ());
+
+      } catch (Exception e) {
+        System.out.println (e);
+      }
+    }
+	}
+
+  public static void main (String [] args) {
+		// test1 ();
+  }
+}

@@ -4,10 +4,43 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
+
+import org.apache.spark.sql.SQLContext;
+import org.apache.spark.SparkContext;
+import org.apache.spark.SparkConf;
+
 
 public class sparksql {
 
 	static SparkSession spark;
+
+	static String sparkMaster;
+	static String sparkAppName;
+	static String	tbName;
+	static String	getrow;
+	static String	col_fam;
+	static String	col1;
+
+	static {
+		tbName = "hive_test", 
+		getrow = "r1",
+		col_fam = "cf",
+		col1 = "c1";
+		sparkMaster = "spark://localhost:7077";
+		sparkAppName = "ezspark"
+	}
 
 	public static void init () {
 		spark = SparkSession
@@ -17,9 +50,21 @@ public class sparksql {
 			// .Config ("")
 	}
 
+	public static void test_hbase () {
+		SparkConf sparkconf = new SparkConf ()
+			.setMaster (sparkMaster)
+			.setAppName (sparkAppName);
+		HBaseConfiguration hbaseconf = HBaseConfiguration.create ();
+		hbaseconf.set (TableInputFormat.INPUT_TABLE, tbName);
+		SparkContext sc = new SparkContext (sparkconf);
+		sc.newAPIHadoopRDD (hbaseconf, TableInputFormat.class, 
+			ImmutableBytesWritable.class, Result.class);
+	}
+
 	public static void main (String [] args) {
-		init ();
-		createDataFrames ();
+		// init ();
+		// createDataFrames ();
+		test_hbase ();
 	}
 
 	public static Dataset <Row> createDataFrames () {

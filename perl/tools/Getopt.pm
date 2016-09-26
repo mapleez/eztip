@@ -8,16 +8,19 @@ use vars qw /@ISA @EXPORT/;
 
 require Exporter;
 @ISA = qw (Exporter);
-@EXPORT = qw /opt parse/; # _print_all/;
+@EXPORT = qw /opt parse arg _print_all/; # _print_all/;
 
 # ========= configuration ==========
 # my $prefix = '-';
 # my $longprefix = '--';
 # ==================================
 
-my  %options = ();
-my  %options_long = ();
-my  @argtmp = ();
+my $VERSION = "v1.1";
+my %options = ();
+my %options_long = ();
+my %reg_args = ();
+my @reg_args = ();
+my @argtmp = (); # last version
 
 =head
 Register options
@@ -27,21 +30,42 @@ Register options
 =cut;
 sub opt {
 	if (3 < scalar @_) {
-		print "Error, arguments is not enough.\n";
-		return 0;
+		die "Error, arguments is not enough.\n";
 	}
-	my ($short, $long, $param) = @_;
+	my ($short, $long, $param, $defval) = @_;
 
 	if (length $short && 
 		! exists $options {$short}) {
+
+		# each option entry
 		$options {$short} = {
 			short => $short, 
 			long  => $long, 
 			param => $param, 
-			value => ''
+			value => $defval ? $defval : ''
 		};
 		# get reference for long option.
 		$options_long {$long} = $options {$short}; 
+		return 1;
+	}
+	return -1;
+}
+
+# now all the argument will be appended after all options.
+# That is the format below:
+#   $ scanjar [options ...] [arguments ...]
+# TODO... this function is not finished.
+sub arg {
+	my ($argname, $defval) = @_;
+
+	if (length $argname &&
+		! exists $reg_args {$argname}) {
+		$reg_args {$argname} = {
+			argname => $argname,
+			index => $#reg_args != -1 ? ($#reg_args + 1) : 0,
+			value => $defval ? $defval : ''
+		};
+		push @reg_args, $reg_args {$argname}; # stored a hash
 		return 1;
 	}
 	return -1;
@@ -53,12 +77,13 @@ param: args
 =cut;
 sub parse {
 	my @args = @_; # @ARGV;
+	my $reg_arg_index = 0;
 	for (my $i = 0; $i <= $#args; $i ++) {
 		my $a = $args [$i];
 
 		# long or short param
 		my ($opt, $entry) = (&_parse_opt ($a), undef);
-			if ($opt ne "-1") {
+			if (defined $opt) {
 				$entry = $options_long {$opt} 
 					if 1 < length $opt && exists $options_long {$opt};
 				$entry = $options {$opt}
@@ -70,7 +95,7 @@ sub parse {
 				$entry -> {value} = $args [++ $i]
 					if $entry -> {param};
 			} else {
- 				# $opt == -1
+				$reg_args [$reg_arg_index ++] -> {value} = $a;
 				push @argtmp, $a;
 			}
 	}
@@ -88,13 +113,13 @@ sub _parse_opt {
 		(shift, "", "");
 	die "Error input param in &_parse_opt\n"
 		unless length $opt;
-	if ($opt =~ /^-(\w)|^--(\w{1,})/) {
+	if ($opt =~ /^-([a-zA-Z])|^--([a-zA-Z]\w*)/) {
 		($short, $long) = ($1, $2);
 		return $short if $short && 1 == length $short;
 		return $long if $long && 1 < length $long;
 		die "Error input option \'$opt\'\n";
 	} 
-	"-1";
+	undef;
 }
 
 # for debug
@@ -109,8 +134,19 @@ sub _print_all {
 		}
 	}
 
-	print "-" x 7, " args ", "-" x 7, "\n";
+	print "-" x 7, " tmp args ", "-" x 7, "\n";
 	print "@argtmp\n";
+
+	print "-" x 7, " register args ", "-" x 7, "\n";
+	while (my ($key, $val) = each %reg_args) {
+		print "$key:\n";
+		while (my ($k, $v) = each %$val) {
+			print " $k => $v\n";
+		}
+	}
+
+	print "-" x 7, " register args arr", "-" x 7, "\n";
+	print "@reg_args\n";
 }
 
 

@@ -29,7 +29,7 @@ Register options
  return 1 if successful.
 =cut;
 sub opt {
-	if (3 < scalar @_) {
+	if (3 > scalar @_) {
 		die "Error, arguments is not enough.\n";
 	}
 	my ($short, $long, $param, $defval) = @_;
@@ -42,7 +42,12 @@ sub opt {
 			short => $short, 
 			long  => $long, 
 			param => $param, 
-			value => $defval ? $defval : ''
+			value => eval {
+				my $v = ($defval ? $defval : '') 
+					if $param;
+				$v = ($defval ? 1 : 0) 
+					unless $param;
+			}
 		};
 		# get reference for long option.
 		$options_long {$long} = $options {$short}; 
@@ -51,10 +56,11 @@ sub opt {
 	return -1;
 }
 
-# now all the argument will be appended after all options.
-# That is the format below:
-#   $ scanjar [options ...] [arguments ...]
-# TODO... this function is not finished.
+=head
+now all the argument will be appended after all options.
+That is the format below:
+  $ scanjar [options ...] [arguments ...]
+=cut;
 sub arg {
 	my ($argname, $defval) = @_;
 
@@ -83,21 +89,24 @@ sub parse {
 
 		# long or short param
 		my ($opt, $entry) = (&_parse_opt ($a), undef);
-			if (defined $opt) {
-				$entry = $options_long {$opt} 
-					if 1 < length $opt && exists $options_long {$opt};
-				$entry = $options {$opt}
-					if 1 == length $opt && exists $options {$opt};
+		if (defined $opt) {
+			$entry = $options_long {$opt} 
+				if 1 < length $opt && exists $options_long {$opt};
+			$entry = $options {$opt}
+				if 1 == length $opt && exists $options {$opt};
 
-				unless (defined $entry) {
-					die "Error, unknown option \'$opt\'\n";
-				}
-				$entry -> {value} = $args [++ $i]
-					if $entry -> {param};
-			} else {
-				$reg_args [$reg_arg_index ++] -> {value} = $a;
-				push @argtmp, $a;
+			unless (defined $entry) {
+				die "Error, unknown option \'$opt\'\n";
 			}
+
+			$entry -> {value} = $args [++ $i]
+				if $entry -> {param};
+			$entry -> {value} = 1
+				unless $entry -> {param};
+		} else {
+			$reg_args [$reg_arg_index ++] -> {value} = $a;
+			push @argtmp, $a;
+		}
 	}
 }
 
@@ -146,7 +155,11 @@ sub _print_all {
 	}
 
 	print "-" x 7, " register args arr", "-" x 7, "\n";
-	print "@reg_args\n";
+	foreach my $hash (@reg_args) {
+		while (my ($k, $v) = each %$hash) {
+			print " $k => $v\n";
+		}
+	}
 }
 
 

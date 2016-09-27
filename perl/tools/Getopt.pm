@@ -10,11 +10,6 @@ require Exporter;
 @ISA = qw (Exporter);
 @EXPORT = qw /opt parse arg _print_all/; # _print_all/;
 
-# ========= configuration ==========
-# my $prefix = '-';
-# my $longprefix = '--';
-# ==================================
-
 my $VERSION = "v1.1";
 my %options = ();
 my %options_long = ();

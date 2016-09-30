@@ -126,6 +126,12 @@ sub _parse_opt {
 	undef;
 }
 
+sub get_op_val {
+	my $opt = shift;
+	print "Error, optname empty..\n"
+		if !defined $opt or length $opt;
+}
+
 # for debug
 sub _print_all {
 	print "Input options: @ARGV\n";

@@ -12,6 +12,7 @@ my @b = (30..50);
 my @c = ('a' .. 'z');
 my @d = ('A' .. 'Z');
 my @e = ('0' .. '9', @c, @d);
+my @array = ([1, 2, 3], [4, 5, 6], [7, 8, 9]);
 my @strings = qw/
 	faefae fnkja 
 	jfkejan lkjjk klja 
@@ -44,6 +45,15 @@ my $first = shift @a;
 push @a, $first;
 
 print "";
+
+=head
+print 2 dimension array
+=cut
+for (my $i = 0; $i < @array; ++ $i) {
+	for (my $j = 0; $j < @{$array [$i]}; ++ $j) {
+		print "($i, $j) = ", $array [$i] [$j], "\n";
+	}
+}
 
 
 __END__

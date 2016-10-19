@@ -1,4 +1,4 @@
-package ez.libezjava;
+package dt.ez;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

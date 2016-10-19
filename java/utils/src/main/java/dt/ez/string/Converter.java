@@ -3,7 +3,7 @@
  * Describe : String utilities for Converting.
  * Date : 2016/10/19
  */
-package dt.ez.String;
+package dt.ez.string;
 
 public class Converter {
 

@@ -70,7 +70,12 @@ public class SimpleKafkaProducer {
 		new Thread () {
 			public void run () {
 				// while (canRun) {
+				try {
 					produce ();
+				} catch (Exception ex) {
+					// TODO...
+					ex.printStackTrace ();
+				}
 				// }
 			}
 		}.start ();

@@ -25,6 +25,11 @@ public class HbaseConf {
 			conf.set (e.getKey (), e.getValue ());
 	}
 
+	public HbaseConf addProperty (String key, String val) {
+		conf.set (key, val);
+		return this;
+	}
+
 	public Configuration getConf () {
 		return this.conf;
 	}

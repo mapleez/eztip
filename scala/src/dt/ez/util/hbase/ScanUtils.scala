@@ -23,11 +23,11 @@ class ScanUtils extends Tools {
    * So I use a List to store filters and invoking setFilter
    * in method get().
    */
-  val filters = List [Filter] ()
+  var filters = List [Filter] ()
   
   def limit (num: Long) : ScanUtils = {
     scan.setCaching (1)
-    filters :+ new PageFilter (num)
+    filters :+= new PageFilter (num)
     this
   }
   
@@ -39,14 +39,14 @@ class ScanUtils extends Tools {
   def keySmallerThan (key: String, equal: Boolean = true) : ScanUtils = {
     val cmp = if (equal) CompareOp.LESS_OR_EQUAL else CompareOp.LESS
     val rowkeyFilter = new RowFilter (cmp, new BinaryComparator (key.getBytes))
-    filters :+ rowkeyFilter
+    filters :+= rowkeyFilter
     this
   }
   
   def keyBiggerThan (key: String, equal: Boolean = true) : ScanUtils = {
     val cmp = if (equal) CompareOp.LESS_OR_EQUAL else CompareOp.LESS
     val rowkeyFilter = new RowFilter (cmp, new BinaryComparator (key))
-    filters :+ rowkeyFilter
+    filters :+= rowkeyFilter
     this
   }
   
@@ -72,8 +72,8 @@ class ScanUtils extends Tools {
     val cmpSta = if (eqSta) CompareOp.GREATER_OR_EQUAL else CompareOp.GREATER
     val cmpEnd = if (eqEnd) CompareOp.LESS_OR_EQUAL else CompareOp.LESS
     /* Set Start key, end key. */
-    filters :+ new RowFilter (cmpSta, new BinaryComparator (start))
-    filters :+ new RowFilter (cmpEnd, new BinaryComparator (end))
+    filters :+= new RowFilter (cmpSta, new BinaryComparator (start))
+    filters :+= new RowFilter (cmpEnd, new BinaryComparator (end))
     this
   }
   

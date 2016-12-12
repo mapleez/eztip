@@ -1,9 +1,5 @@
 package com.dt.ez.common.util;
 
-//import static com.google.common.base.Preconditions.checkArgument;
-//import static com.google.common.base.Preconditions.checkNotNull;
-//import static com.google.common.base.Preconditions.checkPositionIndex;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -19,20 +15,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
-//import org.apache.hadoop.hbase.classification.InterfaceAudience;
-//import org.apache.hadoop.hbase.classification.InterfaceStability;
-//import org.apache.hadoop.hbase.Cell;
-//import org.apache.hadoop.hbase.KeyValue;
 //import org.apache.hadoop.io.RawComparator;
 //import org.apache.hadoop.io.WritableComparator;
 //import org.apache.hadoop.io.WritableUtils;
 
 import sun.misc.Unsafe;
-
-//import com.google.common.annotations.VisibleForTesting;
-//import com.google.common.collect.Lists;
 
 import com.dt.ez.common.util.Bytes.LexicographicalComparerHolder.UnsafeComparer;
 
@@ -123,21 +110,22 @@ public class Bytes {
   /**
    * Byte array comparator class.
    */
-  public static class ByteArrayComparator implements Comparator <byte[]>/* implements RawComparator <byte []> */{
+  public static class ByteArrayComparator implements Comparator <byte []> {
     /**
      * Constructor
      */
-    public ByteArrayComparator() {
-      super();
+    public ByteArrayComparator () {
+      super ();
     }
     
     public int compare (byte [] left, byte [] right) {
       return compareTo (left, right);
     }
     
-    public int compare(byte [] b1, int s1, int l1, byte [] b2, int s2, int l2) {
+		// TODO...
+    public int compare (byte [] b1, int s1, int l1, byte [] b2, int s2, int l2) {
       return LexicographicalComparerHolder.BEST_COMPARER.
-        compareTo(b1, s1, l1, b2, s2, l2);
+        compareTo (b1, s1, l1, b2, s2, l2);
     }
   }
 
@@ -153,11 +141,12 @@ public class Bytes {
 //  @InterfaceStability.Stable
   public static class RowEndKeyComparator extends ByteArrayComparator {
     @Override
-    public int compare(byte[] left, byte[] right) {
-      return compare(left, 0, left.length, right, 0, right.length);
+    public int compare (byte [] left, byte [] right) {
+      return compare (left, 0, left.length, right, 0, right.length);
     }
+
     @Override
-    public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
+    public int compare (byte [] b1, int s1, int l1, byte [] b2, int s2, int l2) {
       if (b1 == b2 && s1 == s2 && l1 == l2) {
         return 0;
       }
@@ -167,14 +156,14 @@ public class Bytes {
       if (l2 == 0) {
         return -1;
       }
-      return super.compare(b1, s1, l1, b2, s2, l2);
+      return super.compare (b1, s1, l1, b2, s2, l2);
     }
   }
 
   /**
    * Pass this to TreeMaps where byte [] are keys.
    */
-  public final static Comparator<byte []> BYTES_COMPARATOR = new ByteArrayComparator();
+  public final static Comparator <byte []> BYTES_COMPARATOR = new ByteArrayComparator ();
 
   /**
    * Use comparing byte arrays, byte-by-byte
@@ -273,7 +262,7 @@ public class Bytes {
    */
   public static int putBytes (byte[] tgtBytes, int tgtOffset, byte[] srcBytes,
       int srcOffset, int srcLength) {
-    System.arraycopy(srcBytes, srcOffset, tgtBytes, tgtOffset, srcLength);
+    System.arraycopy (srcBytes, srcOffset, tgtBytes, tgtOffset, srcLength);
     return tgtOffset + srcLength;
   }
 
@@ -284,8 +273,8 @@ public class Bytes {
    * @param b byte to write out
    * @return incremented offset
    */
-  public static int putByte(byte[] bytes, int offset, byte b) {
-    bytes[offset] = b;
+  public static int putByte (byte [] bytes, int offset, byte b) {
+    bytes [offset] = b;
     return offset + 1;
   }
 
@@ -296,9 +285,9 @@ public class Bytes {
    * @param buf ByteBuffer to write out
    * @return incremented offset
    */
-  public static int putByteBuffer(byte[] bytes, int offset, ByteBuffer buf) {
-    int len = buf.remaining();
-    buf.get(bytes, offset, len);
+  public static int putByteBuffer (byte [] bytes, int offset, ByteBuffer buf) {
+    int len = buf.remaining ();
+    buf.get (bytes, offset, len);
     return offset + len;
   }
 

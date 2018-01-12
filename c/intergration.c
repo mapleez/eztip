@@ -33,11 +33,16 @@ double _func (double x) {
 	return (3 * x + 1);
 }
 
+double _func1 (double x) {
+	return (x * x);
+}
+
 /* Example usage. */
 int main (int argc, char* argv []) {
 	// range of [2.0, 3.0] for function y=3x+1
 	double res = intergration (2, 3, _func);
-	printf ("%f\n", res);
+	double res1 = intergration (2, 3, _func1);
+	printf ("%f, %f\n", res, res1);
 	return 0;
 }
 
